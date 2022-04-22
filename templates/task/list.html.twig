@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                {{ form(filterForm, {"action" : path('task_list'), "method" : "GET"}) }}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Описание</th>
+                        <th scope="col">Срок выполнения</th>
+                        <th scope="col">Выполнена</th>
+                        <th scope="col">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <th scope="row">{{ task.id }}</th>
+                            <td>{{ task.name }}</td>
+                            <td>{{ task.description }}</td>
+                            <td>{{ task.dueDate|date("d.m.Y") }}</td>
+                            <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
+                            <td><a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ path("task_create") }}" title="Создать задачу">Создать задачу</a>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}
