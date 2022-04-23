@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repository=TaskRepository::class)
+ * @ORM\Entity(repositoryClass=TaskRepository::class)
  */
 class Task
 {
