@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,6 +27,9 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $task->setAuthor($this->getUser());
+
             $this->getDoctrine()->getManager()->persist($task);
             $this->getDoctrine()->getManager()->flush();
 
@@ -79,6 +83,7 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/tasks/{id}/complete", name="task_complete")
+     * @IsGranted("ROLE_USER")
      * @return Response
      */
     public function complete($id): Response
@@ -86,8 +91,10 @@ class TaskController extends AbstractController
         /** @var Task $task */
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
+        $this->denyAccessUnlessGranted('complete', $task);
+
         if ($task === null) {
-            return $this->createNotFoundException(sprintf("Task with id %s not found", $id));
+            throw $this->createNotFoundException(sprintf("Task with id %s not found", $id));
         }
 
         $task->setIsCompleted(true);

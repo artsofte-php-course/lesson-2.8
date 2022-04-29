@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TaskRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -47,6 +48,13 @@ class Task
      */
     protected $isCompleted = false;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="user")
+     * @var User
+     */
+    protected $author;
+
     /**
      * Create empty task
      */
@@ -54,6 +62,27 @@ class Task
     {
         $this->dueDate = new \DateTime('now');
         $this->isCompleted = false;
+    }
+
+
+    /**
+     * Set task Author
+     * @param User|null $author
+     * @return void
+     */
+    public function setAuthor(UserInterface $author = null)
+    {
+        $this->author = $author;
+    }
+
+
+    /**
+     * Return task author
+     * @return User|null
+     */
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
 
