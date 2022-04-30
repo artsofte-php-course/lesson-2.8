@@ -98,11 +98,29 @@ class ProjectController extends AbstractController
     public function projectById($id): Response
     {
         /** @var Task $project */
-        $project = $this->getDoctrine()->getManager()->find(Task::class, $id);
+        $project = $this->getDoctrine()->getManager()->find(Project::class, $id);
 
         if ($project === null) {
             throw $this->createNotFoundException(sprintf("Project with id %s not found", $id));
         }
+        $Flag=False;
+        $user = $this->getUser();
+        foreach ($user->getRoles() as $role)
+        {
+            if($role === 'ROLE_ADMIN')
+            {
+                $Flag=True;
+            }
+        }
+
+        if(!$Flag)
+        {
+            if($user->getId() !== $project->getAuthor())
+            {
+                throw $this->createAccessDeniedException();
+            }
+        }
+
         $tasks = $this->getDoctrine()->getRepository(Task::class)
             ->findBy(['project' => $id], []);
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Project;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
@@ -48,6 +49,20 @@ class TaskController extends AbstractController
      */
     public function list(Request $request): Response
     {
+        $Flag=False;
+        $user = $this->getUser();
+        foreach ($user->getRoles() as $role)
+        {
+            if($role === 'ROLE_ADMIN')
+            {
+                $Flag=True;
+            }
+        }
+        if(!$Flag)
+        {
+            $ids = $this->getProjectID($user->getId());
+        }
+
         $taskFilterForm = $this->createForm(TaskFilterType::class);
 
         $taskFilterForm->handleRequest($request);
@@ -58,19 +73,35 @@ class TaskController extends AbstractController
             if ($filter['isCompleted'] === null) {
                 unset($filter['isCompleted']);
             }
-
+            if(!$Flag)
+            {
+                $filter['project'] = $ids;
+            }
             $tasks = $this->getDoctrine()->getRepository(Task::class)
                 ->findBy($filter, [
                     'dueDate' => 'DESC'
                 ]);
 
         } else {
-            /** @var $tasks */
-            $tasks = $this->getDoctrine()->getManager()
-                ->getRepository(Task::class)
-                ->findBy([], [
-                    'dueDate' => 'DESC'
-                ]);
+            if($Flag)
+            {
+                /** @var $tasks */
+                $tasks = $this->getDoctrine()->getManager()
+                    ->getRepository(Task::class)
+                    ->findBy([], [
+                        'dueDate' => 'DESC'
+                    ]);
+            }
+            else
+            {
+                /** @var $tasks */
+                $tasks = $this->getDoctrine()->getManager()
+                    ->getRepository(Task::class)
+                    ->findBy(['project' => $ids], [
+                        'dueDate' => 'DESC'
+                    ]);
+            }
+
         }
 
 
@@ -103,5 +134,22 @@ class TaskController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         return $this->redirectToRoute('task_list');
+    }
+
+    private function getProjectID(int $id)
+    {
+        $returnId = [];
+
+        /** @var $projects */
+        $projects = $this->getDoctrine()->getManager()
+            ->getRepository(Project::class)
+            ->findBy(['author' => $id]);
+
+        foreach ($projects as $project)
+        {
+            array_push($returnId, $project->getId());
+        }
+
+        return $returnId;
     }
 }
