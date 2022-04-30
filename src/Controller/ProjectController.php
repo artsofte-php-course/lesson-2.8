@@ -100,8 +100,6 @@ class ProjectController extends AbstractController
         /** @var Task $project */
         $project = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
-//        $project->denyAccessUnlessGranted('complete', $project);
-
         if ($project === null) {
             throw $this->createNotFoundException(sprintf("Project with id %s not found", $id));
         }
