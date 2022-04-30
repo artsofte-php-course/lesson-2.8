@@ -23,7 +23,11 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $option = [
+            'userId' => $this->getUser()->getId(),
+            'userRole' => $this->getUser()->getRoles(),
+        ];
+        $form = $this->createForm(TaskType::class, $task, $option);
 
         $form->handleRequest($request);
 
@@ -139,6 +143,7 @@ class TaskController extends AbstractController
     private function getProjectID(int $id)
     {
         $returnId = [];
+
 
         /** @var $projects */
         $projects = $this->getDoctrine()->getManager()
