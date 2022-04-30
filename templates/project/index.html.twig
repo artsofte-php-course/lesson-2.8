@@ -18,7 +18,7 @@
                     <tbody>
                     {% for project in projects %}
                         <tr>
-                            <th scope="row">{{ project.id }}</th>
+                            <th scope="row"><a href="{{ path("project_byId", {"id" : project.id}) }}">{{ project.id }}</a></th>
                             <td>{{ project.token }}</td>
                             <td>{{ project.name }}</td>
                         </tr>

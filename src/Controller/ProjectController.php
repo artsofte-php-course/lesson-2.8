@@ -90,4 +90,27 @@ class ProjectController extends AbstractController
             'form' => $form->createView(),
     ]);
     }
+
+
+    /**
+     * @Route("/project/{id}/", name="project_byId")
+     */
+    public function projectById($id): Response
+    {
+        /** @var Task $project */
+        $project = $this->getDoctrine()->getManager()->find(Task::class, $id);
+
+//        $project->denyAccessUnlessGranted('complete', $project);
+
+        if ($project === null) {
+            throw $this->createNotFoundException(sprintf("Project with id %s not found", $id));
+        }
+        $tasks = $this->getDoctrine()->getRepository(Task::class)
+            ->findBy(['project' => $id], []);
+
+        return $this->render('project/project.html.twig',[
+            'id' => $id,
+            'tasks' => $tasks,
+        ]);
+    }
 }

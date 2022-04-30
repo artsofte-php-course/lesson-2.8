@@ -56,6 +56,12 @@ class Task
     protected $author;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Project", inversedBy="project")
+     * @var Project
+     */
+    protected $project;
+
+    /**
      * Create empty task
      */
     public function __construct()
@@ -83,6 +89,25 @@ class Task
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * Set task Project
+     * @param Project|null $project
+     * @return void
+     */
+    public function setProject(Project $project = null)
+    {
+        $this->project = $project;
+    }
+
+    /**s
+     * Return task project
+     * @return Project|null
+     */
+    public function getProject()
+    {
+        return $this->project;
     }
 
 
