@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+{% set admin = app.user.checkRole("ROLE_ADMIN") %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Ключ</th>
+                        <th scope="col">Название</th>
+                        {% if admin %}
+                            <th scope="col">Владелец</th>
+                        {% endif %}
+                        <th scope="col">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td><a href="{{ path("project_info", {"slug": project.projectKey}) }}">
+                                    {{ project.projectKey }}</a></td>
+                            <td>{{ project.name }}</td>
+                            {% if admin %}
+                                <td>{{ project.owner }}</td>
+                            {% endif %}
+                            <td><a>Удалить</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p><a title="Создать новый проект" href="{{ path("project_create") }}">Создать новый проект</a></p>
+                <p><a title="Список задач" href="{{ path("task_list") }}">Список всех задач</a></p>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}

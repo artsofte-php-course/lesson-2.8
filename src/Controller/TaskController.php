@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Project;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
@@ -22,12 +23,13 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class, $task, [
+            "projects_list" => $this -> getDoctrine() -> getRepository(Project::class) -> findAll()
+        ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $task->setAuthor($this->getUser());
 
             $this->getDoctrine()->getManager()->persist($task);
@@ -39,7 +41,6 @@ class TaskController extends AbstractController
         return $this->render("task/create.html.twig", [
             'form' => $form->createView()
         ]);
-
     }
 
     /**
@@ -73,11 +74,9 @@ class TaskController extends AbstractController
                 ]);
         }
 
-
-
         return $this->render('task/list.html.twig', [
             'tasks' => $tasks,
-            'filterForm' => $taskFilterForm->createView()
+            'filterForm' => $taskFilterForm->createView(),
         ]);
     }
 

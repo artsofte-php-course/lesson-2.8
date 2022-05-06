@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TaskRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
+//use Symfony\Component\Security\Core\;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -56,6 +57,12 @@ class Task
     protected $author;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Project", inversedBy="project")
+     * @var Project
+     */
+    protected $project;
+
+    /**
      * Create empty task
      */
     public function __construct()
@@ -75,14 +82,33 @@ class Task
         $this->author = $author;
     }
 
-
     /**
      * Return task author
      * @return User|null
      */
-    public function getAuthor()
+    public function getAuthor(): ?User
     {
         return $this->author;
+    }
+
+    /**
+     * Set task Project
+     * @param Project|null $project
+     * @return void
+     */
+    public function setProject(Project $project = null)
+    {
+        $this->project = $project;
+    }
+
+
+    /**
+     * Return task Project
+     * @return Project|null
+     */
+    public function getProject(): ?Project
+    {
+        return $this->project;
     }
 
 
