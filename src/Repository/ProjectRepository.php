@@ -37,6 +37,18 @@ class ProjectRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
+    public function getAvailableProjects(int $id, Bool $hasAdmin = false): array
+    {
+        $filter['author'] = null;
+        if(!$hasAdmin)
+            $filter['author'] = $id;
+        return $this->getEntityManager()->getRepository(Project::class)->findBy($filter);
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
     public function remove(Project $entity, bool $flush = true): void
     {
         $this->_em->remove($entity);

@@ -10,9 +10,24 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TaskFilterType extends AbstractType
 {
+
+    protected $hasAdmin;
+    protected $id;
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'userId' => 0,
+            'hasAdmin' => false
+        ]);
+
+        $resolver->setAllowedTypes('userId', 'int');
+        $resolver->setAllowedTypes('hasAdmin', 'Bool');
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

@@ -34,21 +34,9 @@ class ProjectController extends AbstractController
     {
         $user = $this->getUser();
 
-        if($this->isGranted('ROLE_ADMIN'))
-        {
-            /** @var $projects */
-            $projects = $this->getDoctrine()->getManager()
-                ->getRepository(Project::class)
-                ->findBy([], []);
-        }
-        else
-        {
-            /** @var $projects */
-            $projects = $this->getDoctrine()->getManager()
-                ->getRepository(Project::class)
-                ->findBy(['author' => $user->getId()]);
-        }
-
+        $projects = $this->getDoctrine()
+            ->getRepository(Project::class)
+            ->getAvailableProjects($user->getId(), $this->isGranted('ROLE_ADMIN'));
 
 
         return $this->render('project/index.html.twig', [
