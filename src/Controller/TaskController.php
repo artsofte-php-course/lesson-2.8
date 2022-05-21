@@ -14,7 +14,6 @@ use Symfony\Component\HttpFoundation\Request;
 class TaskController extends AbstractController
 {
     /**
-     *
      * @Route("/tasks/create", name="task_create")
      * @param Request $request
      * @return Response
