@@ -21,10 +21,14 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $option = [
+            'userId' => $this->getUser()->getId(),
+        ];
+
+
+        $form = $this->createForm(TaskType::class, $task, $option);
 
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
 
             $task->setAuthor($this->getUser());

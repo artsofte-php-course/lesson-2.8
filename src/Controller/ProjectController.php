@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Type\ProjectType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -42,6 +43,7 @@ class ProjectController extends AbstractController
 
     /**
      * @Route("/projects", name="project_list")
+     * @IsGranted("ROLE_USER")
      * @return Response
      */
     public function list(Request $request): Response
@@ -50,17 +52,16 @@ class ProjectController extends AbstractController
 
         $form->handleRequest($request);
 
-        /** @var $tasks */
         $projects = $this->getDoctrine()->getManager()
             ->getRepository(Project::class)
             ->findBy([], []);
 
-
+        $user = $this->getUser();
 
         return $this->render('project/project-list.html.twig', [
             'projects' => $projects,
-            'form' => $form->createView()
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
-
 }
