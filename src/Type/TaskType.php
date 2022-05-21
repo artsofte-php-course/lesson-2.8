@@ -18,79 +18,51 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class TaskType extends AbstractType
 {
 
+    protected $hasAdmin;
     protected $id;
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'userId' => 0,
-            'userRole' => []
+            'hasAdmin' => false
         ]);
 
-        // you can also define the allowed types, allowed values and
-        // any other feature supported by the OptionsResolver component
         $resolver->setAllowedTypes('userId', 'int');
-        $resolver->setAllowedTypes('userRole', 'array');
+        $resolver->setAllowedTypes('hasAdmin', 'Bool');
     }
 
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $roles = $options['userRole'];
-        $flag = false;
-        foreach ($roles as $role)
-        {
-            if ($role === 'ROLE_ADMIN')
-            {
-                $flag = True;
-            }
-        }
-
+        $this->hasAdmin = $options['hasAdmin'];
         $this->id = $options['userId'];
 
-        if ($flag)
-        {
-            $builder
-                ->add('name', TextType::class)
-                ->add('description', TextareaType::class)
-                ->add('dueDate', DateType::class, [
-                    'years' => range(2022,2023)
-                ])
-                ->add('project', EntityType::class, [
-                    'class' => Project::class,
-                    'query_builder' => function (EntityRepository $er) {
-                        $sql = sprintf('p.author = %d', $this->id);
-                        return $er->createQueryBuilder('p')
-                            ->orderBy('p.id', 'ASC');
-                    },
-                    'choice_label' => 'id',
-                ])
-                ->add('save', SubmitType::class)
-            ;
-        }
-        else
-        {
-            $builder
-                ->add('name', TextType::class)
-                ->add('description', TextareaType::class)
-                ->add('dueDate', DateType::class, [
-                    'years' => range(2022,2023)
-                ])
-                ->add('project', EntityType::class, [
-                    'class' => Project::class,
-                    'query_builder' => function (EntityRepository $er) {
-                        $sql = sprintf('p.author = %d', $this->id);
-                        return $er->createQueryBuilder('p')
-                            ->where($sql)
-                            ->orderBy('p.id', 'ASC');
-                    },
-                    'choice_label' => 'id',
-                ])
-                ->add('save', SubmitType::class)
-            ;
-        }
-
-
-
+        $builder
+            ->add('name', TextType::class)
+            ->add('description', TextareaType::class)
+            ->add('dueDate', DateType::class, [
+                'years' => range(2022,2023)
+            ])
+            ->add('project', EntityType::class, [
+                'class' => Project::class,
+                'query_builder' => function (EntityRepository $er) {
+                if($this->hasAdmin)
+                {
+                    return $er->createQueryBuilder('p')
+                        ->orderBy('p.id', 'ASC');
+                }
+                else
+                {
+                    $sql = sprintf('p.author = %d', $this->id);
+                    return $er->createQueryBuilder('p')
+                        ->where($sql)
+                        ->orderBy('p.id', 'ASC');
+                }
+                },
+                'choice_label' => 'id',
+            ])
+            ->add('save', SubmitType::class)
+        ;
     }
 }
