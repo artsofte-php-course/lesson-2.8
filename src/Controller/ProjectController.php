@@ -32,17 +32,9 @@ class ProjectController extends AbstractController
      */
     public function showPorjects(Request $request): Response
     {
-        $Flag=False;
-        $user = $this->security->getUser();
-        foreach ($user->getRoles() as $role)
-        {
-            if($role === 'ROLE_ADMIN')
-            {
-                $Flag=True;
-            }
-        }
+        $user = $this->getUser();
 
-        if($Flag)
+        if($this->isGranted('ROLE_ADMIN'))
         {
             /** @var $projects */
             $projects = $this->getDoctrine()->getManager()
@@ -73,10 +65,14 @@ class ProjectController extends AbstractController
         $form = $this->createForm(ProjectType::class, $project);
 
         $form->handleRequest($request);
-        $user = $this->security->getUser();
+        $user = $this->getUser();
 
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+
+
+            $project->setToken(strval(random_int(10000, 99999)));
 
             $project->setAuthor($user->getId());
 
@@ -103,17 +99,10 @@ class ProjectController extends AbstractController
         if ($project === null) {
             throw $this->createNotFoundException(sprintf("Project with id %s not found", $id));
         }
-        $Flag=False;
-        $user = $this->getUser();
-        foreach ($user->getRoles() as $role)
-        {
-            if($role === 'ROLE_ADMIN')
-            {
-                $Flag=True;
-            }
-        }
 
-        if(!$Flag)
+        $user = $this->getUser();
+
+        if(!$this->isGranted('ROLE_ADMIN'))
         {
             if($user->getId() !== $project->getAuthor())
             {
@@ -127,6 +116,43 @@ class ProjectController extends AbstractController
         return $this->render('project/project.html.twig',[
             'id' => $id,
             'tasks' => $tasks,
+        ]);
+    }
+
+
+    /**
+     * @Route("/project/{id}/edit", name="project_edit_byId")
+     */
+    public function editProject(Request $request, $id): Response
+    {
+        $project = $this->getDoctrine()->getManager()->find(Project::class, $id);
+
+        $user = $this->getUser();
+
+        if(!$this->isGranted('ROLE_ADMIN'))
+        {
+            if($user->getId() !== $project->getAuthor())
+            {
+                throw $this->createAccessDeniedException();
+            }
+        }
+
+        $form = $this->createForm(ProjectType::class, $project);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+            $this->getDoctrine()->getManager()->persist($project);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('project_list');
+        }
+
+        return $this->render("project/project_edit.html.twig", [
+            'form' => $form->createView(),
+            'id' => $id,
         ]);
     }
 }

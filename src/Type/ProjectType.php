@@ -14,7 +14,6 @@ class ProjectType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('token', TextType::class)
             ->add('name', TextType::class)
             ->add('save', SubmitType::class)
         ;

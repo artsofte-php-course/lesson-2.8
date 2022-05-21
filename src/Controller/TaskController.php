@@ -25,7 +25,7 @@ class TaskController extends AbstractController
         $task = new Task();
         $option = [
             'userId' => $this->getUser()->getId(),
-            'userRole' => $this->getUser()->getRoles(),
+            'hasAdmin' => $this->isGranted('ROLE_ADMIN'),
         ];
         $form = $this->createForm(TaskType::class, $task, $option);
 
@@ -53,61 +53,88 @@ class TaskController extends AbstractController
      */
     public function list(Request $request): Response
     {
-        $Flag=False;
         $user = $this->getUser();
-        foreach ($user->getRoles() as $role)
-        {
-            if($role === 'ROLE_ADMIN')
-            {
-                $Flag=True;
-            }
-        }
-        if(!$Flag)
-        {
-            $ids = $this->getProjectID($user->getId());
-        }
+        $hasAdmin = $this->isGranted('ROLE_ADMIN');
+
+        $ids = $this->getProjectID($user->getId());
 
         $taskFilterForm = $this->createForm(TaskFilterType::class);
 
         $taskFilterForm->handleRequest($request);
 
         if ($taskFilterForm->isSubmitted() && $taskFilterForm->isValid()) {
-
             $filter = $taskFilterForm->getData();
+
             if ($filter['isCompleted'] === null) {
                 unset($filter['isCompleted']);
             }
-            if(!$Flag)
-            {
-                $filter['project'] = $ids;
-            }
-            $tasks = $this->getDoctrine()->getRepository(Task::class)
-                ->findBy($filter, [
-                    'dueDate' => 'DESC'
-                ]);
-
-        } else {
-            if($Flag)
-            {
-                /** @var $tasks */
-                $tasks = $this->getDoctrine()->getManager()
-                    ->getRepository(Task::class)
-                    ->findBy([], [
-                        'dueDate' => 'DESC'
-                    ]);
+            if ($filter['due_date'] === null) {
+                $duedate = array('dueDate' => 'desc');
             }
             else
             {
-                /** @var $tasks */
-                $tasks = $this->getDoctrine()->getManager()
-                    ->getRepository(Task::class)
-                    ->findBy(['project' => $ids], [
-                        'dueDate' => 'DESC'
-                    ]);
+                if($filter['due_date'])
+                {
+                    $duedate = array('dueDate' => 'desc');
+                }
+                else
+                {
+                    $duedate = array('dueDate' => 'asc');
+                }
+
             }
 
-        }
+            if(!$hasAdmin)
+            {
+                $filter['project'] = $ids;
+            }
 
+            if ($filter['projectId'] !== null) {
+                $id = $filter['projectId']->getId();
+                if(!$hasAdmin)
+                {
+                    if($user->getId() !== $id)
+                    {
+                        $filter['project'] = $ids;
+                    }
+                    else
+                    {
+                        unset($filter['project']);
+                        $filter['project'] = $id;
+                    }
+                }
+                else
+                {
+                    unset($filter['project']);
+                    $filter['project'] = $id;
+                }
+
+            }
+
+            if ($filter['authorId'] !== null) {
+                $filter['author'] = $filter['authorId']->getId();
+            }
+            unset($filter['projectId']);
+            unset($filter['authorId']);
+            unset($filter['due_date']);
+
+            $tasks = $this->getDoctrine()->getRepository(Task::class)
+                ->findBy($filter, $duedate);
+
+        } else {
+            $sql = array('project' => $ids);
+            if($hasAdmin)
+            {
+                unset($sql['project']);
+            }
+
+            $tasks = $this->getDoctrine()->getManager()
+                ->getRepository(Task::class)
+                ->findBy($sql, [
+                    'dueDate' => 'DESC'
+                ]);
+
+        }
 
 
         return $this->render('task/list.html.twig', [
@@ -156,5 +183,45 @@ class TaskController extends AbstractController
         }
 
         return $returnId;
+    }
+
+
+    /**
+     * @Route("/tasks/{id}/edit", name="task_edit_byId")
+     * @return Response
+     */
+    public function editTask(Request $request, $id): Response
+    {
+        $user = $this->getUser();
+        $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
+
+        if(!$this->isGranted('ROLE_ADMIN'))
+        {
+            if($user->getId() !== $task->getAuthor()->getId())
+            {
+                throw $this->createAccessDeniedException();
+            }
+        }
+
+        $option = [
+            'userId' => $this->getUser()->getId(),
+            'userRole' => $this->getUser()->getRoles(),
+        ];
+        $form = $this->createForm(TaskType::class, $task, $option);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('task_list');
+        }
+
+        return $this->render("task/task_edit_form.html.twig", [
+            'form' => $form->createView(),
+            'id' => $id,
+        ]);
     }
 }
