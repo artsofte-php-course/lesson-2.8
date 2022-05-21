@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    "Tasks"
+    Tasks
 {% endblock title %}
 
 {% block body %}
@@ -33,9 +33,10 @@
                             <td>{{ task.author }}</td>
                             <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
                             <td>
-                                {% if (is_granted("complete", task)) %}
-                                    <a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a>
+                                {% if (not task.isCompleted) %}
+                                    <p><a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a></p>
                                 {% endif %}
+                                <p><a href="{{ path("task_edit", {"id": task.id}) }}">Edit</a></p>
                             </td>
                         </tr>
                     {% endfor %}

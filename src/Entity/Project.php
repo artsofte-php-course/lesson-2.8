@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity(repositoryClass=ProjectRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\ProjectRepository")
  */
 class Project
 {
@@ -43,7 +43,7 @@ class Project
     protected $owner;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Task", mappedBy="project")
+     * @ORM\OneToMany(targetEntity="App\Entity\Task", mappedBy="project", orphanRemoval=true)
      */
     protected $tasks;
 
@@ -90,6 +90,14 @@ class Project
     public function getName()
     {
         return $this -> name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this -> id;
     }
 
     /**

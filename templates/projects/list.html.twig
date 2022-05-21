@@ -27,7 +27,10 @@
                             {% if admin %}
                                 <td>{{ project.owner }}</td>
                             {% endif %}
-                            <td><a>Удалить</a></td>
+                            <td>
+                                <p><a href="{{ path("project_delete", {"slug": project.projectKey}) }}">Удалить</a></p>
+                                <p><a href="{{ path("project_edit", {"slug": project.projectKey}) }}">Edit</a></p>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

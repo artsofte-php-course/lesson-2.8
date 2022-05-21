@@ -5,14 +5,11 @@ namespace App\Controller;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Type\ProjectType;
-use App\Type\TaskFilterType;
-use phpDocumentor\Reflection\Types\Null_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use const http\Client\Curl\PROXY_HTTP;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ProjectController extends AbstractController
 {
@@ -25,11 +22,12 @@ class ProjectController extends AbstractController
     public function list(Request $request): Response
     {
         $user = $this -> getUser();
+        $project_repository = $this -> getDoctrine() -> getManager() -> getRepository(Project::class);
 
         if (in_array("ROLE_ADMIN", $user -> getRoles())) {
-            $projects = $this -> getDoctrine() -> getManager() -> getRepository(Project::class) -> findAll();
+            $projects = $project_repository -> findAll();
         } else {
-            $projects = $this -> getDoctrine() -> getManager() -> getRepository(Project::class) -> findBy(['owner' => $user]);
+            $projects = $project_repository -> findBy(['owner' => $user]);
         }
         return $this -> render("projects/list.html.twig", [
             "projects" => $projects,
@@ -60,6 +58,7 @@ class ProjectController extends AbstractController
 
         return $this -> render("projects/create.html.twig", [
             "form" => $form -> createView(),
+            "action" => "creating"
         ]);
     }
 
@@ -69,15 +68,58 @@ class ProjectController extends AbstractController
      */
     public function info($slug, Request $request): Response
     {
-        $project = $this -> getDoctrine() -> getRepository(Project::class) ->
-        findBy(["projectKey" => $slug]);
+        $project = $this -> getDoctrine() -> getManager() -> find(Project::class, $slug);
 
         $tasks = $this -> getDoctrine() -> getRepository(Task::class) -> findBy(["project" => $project]);
 
         return $this->render('task/project_tasks.html.twig', [
             'tasks' => $tasks,
-            "project_name" => $project[0] -> getName(),
+            "project_name" => $project -> getName(),
         ]);
     }
 
+    /**
+     * @Route("/projects/{slug}/edit", name="project_edit")
+     * @param $slug
+     * @param Request $request
+     * @return Response
+     */
+    public function edit($slug, Request $request): Response
+    {
+        $project = $this->getDoctrine()->getRepository(Project::class) -> findBy(["projectKey" => $slug])[0];
+
+        $form = $this->createForm(ProjectType::class, $project);
+
+        $form -> handleRequest($request);
+
+        if ($form -> isSubmitted() && $form -> isValid()) {
+            $this -> getDoctrine() -> getManager() -> persist($project);
+            $this -> getDoctrine() -> getManager() -> flush();
+
+            return $this -> redirectToRoute("project_list");
+        }
+
+        return $this->render("projects/create.html.twig", [
+            "form" => $form->createView(),
+            "action" => "editing",
+            "slug" => $slug
+        ]);
+    }
+
+    /**
+     * @Route("/projects/{slug}/delete", name="project_delete")
+     * @param $slug
+     * @param Request $request
+     * @return Response
+     */
+    public function delete($slug, Request $request): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $project = $this->getDoctrine()->getRepository(Project::class) -> findBy(["projectKey" => $slug])[0];
+
+        $em -> remove($project);
+        $em -> flush();
+
+        return $this->redirectToRoute("project_list");
+    }
 }
