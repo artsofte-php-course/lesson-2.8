@@ -13,21 +13,20 @@ class TaskVoter extends Voter
 
     const COMPLETE = 'complete';
     const DELETE = 'delete';
+    const EDIT = 'task_edit';
 
 
     protected function supports($attribute, $subject)
     {
 
-        if (!in_array($attribute, [self::COMPLETE, self::DELETE])) {
+        if (!in_array($attribute, [self::COMPLETE, self::DELETE, self::EDIT])) {
             return false;
         }
 
         if (!$subject instanceof Task) {
             return false;
         }
-
         return true;
-
     }
 
     /**
