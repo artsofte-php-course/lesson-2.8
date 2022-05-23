@@ -63,63 +63,11 @@ class TaskController extends AbstractController
         $taskFilterForm->handleRequest($request);
 
         if ($taskFilterForm->isSubmitted() && $taskFilterForm->isValid()) {
+
             $filter = $taskFilterForm->getData();
-
-            if ($filter['isCompleted'] === null) {
-                unset($filter['isCompleted']);
-            }
-            if ($filter['due_date'] === null) {
-                $duedate = array('dueDate' => 'desc');
-            }
-            else
-            {
-                if($filter['due_date'])
-                {
-                    $duedate = array('dueDate' => 'desc');
-                }
-                else
-                {
-                    $duedate = array('dueDate' => 'asc');
-                }
-
-            }
-
-            if(!$hasAdmin)
-            {
-                $filter['project'] = $ids;
-            }
-
-            if ($filter['projectId'] !== null) {
-                $id = $filter['projectId']->getId();
-                if(!$hasAdmin)
-                {
-                    if($user->getId() !== $id)
-                    {
-                        $filter['project'] = $ids;
-                    }
-                    else
-                    {
-                        unset($filter['project']);
-                        $filter['project'] = $id;
-                    }
-                }
-                else
-                {
-                    unset($filter['project']);
-                    $filter['project'] = $id;
-                }
-
-            }
-
-            if ($filter['authorId'] !== null) {
-                $filter['author'] = $filter['authorId']->getId();
-            }
-            unset($filter['projectId']);
-            unset($filter['authorId']);
-            unset($filter['due_date']);
-
-            $tasks = $this->getDoctrine()->getRepository(Task::class)
-                ->findBy($filter, $duedate);
+            $tasks = $this->getDoctrine()->
+            getRepository(Task::class)->
+            getAvailableTasksByFilter($this->getUser()->getId(), $hasAdmin, $filter);
 
         } else {
             $sql = array('project' => $ids);

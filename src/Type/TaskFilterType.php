@@ -49,7 +49,7 @@ class TaskFilterType extends AbstractType
                 ],
                 'label' => 'По сроку выполнения'
             ])
-            ->add('projectId', EntityType::class, [
+            ->add('project', EntityType::class, [
                 'class' => Project::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
@@ -59,7 +59,7 @@ class TaskFilterType extends AbstractType
                 'required'   => false,
                 'label' => 'Выберите проект',
             ])
-            ->add('authorId', EntityType::class, [
+            ->add('author', EntityType::class, [
                 'class' => User::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
