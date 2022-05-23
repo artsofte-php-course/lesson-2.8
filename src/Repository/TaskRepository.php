@@ -16,6 +16,9 @@ class TaskRepository extends ServiceEntityRepository
 
 
     /**
+     * Получение доступных задач по фильтр, по правам. \n
+     * Для получение задач без использования фильтра, не надо указывать параметр фильтр. \n
+     * Для получения по правам пользователя, нужно передать значение true: Админ.  false: Обычный пользователь. \n
      * @param $id
      * @param $hasAdmin - default value FALSE
      * @param $filter - default value null
@@ -23,7 +26,6 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function getAvailableTasksByFilter($id, $hasAdmin = false, $filter = []): array
     {
-
         if(!empty($filter) and $hasAdmin)
         {
             return $this->getTasksByFilter($filter);

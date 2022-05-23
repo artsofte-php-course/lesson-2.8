@@ -24,7 +24,7 @@ class TaskType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'userId' => 0,
+            'userId' => null,
             'hasAdmin' => false
         ]);
 
