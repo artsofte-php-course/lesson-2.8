@@ -56,8 +56,6 @@ class TaskController extends AbstractController
         $user = $this->getUser();
         $hasAdmin = $this->isGranted('ROLE_ADMIN');
 
-        $ids = $this->getProjectID($user->getId());
-
         $taskFilterForm = $this->createForm(TaskFilterType::class);
 
         $taskFilterForm->handleRequest($request);
@@ -70,17 +68,9 @@ class TaskController extends AbstractController
             getAvailableTasksByFilter($this->getUser()->getId(), $hasAdmin, $filter);
 
         } else {
-            $sql = array('project' => $ids);
-            if($hasAdmin)
-            {
-                unset($sql['project']);
-            }
-
-            $tasks = $this->getDoctrine()->getManager()
-                ->getRepository(Task::class)
-                ->findBy($sql, [
-                    'dueDate' => 'DESC'
-                ]);
+            $tasks = $this->getDoctrine()->
+            getRepository(Task::class)->
+            getAvailableTasksByFilter($this->getUser()->getId(), $hasAdmin);
 
         }
 
@@ -116,24 +106,6 @@ class TaskController extends AbstractController
         return $this->redirectToRoute('task_list');
     }
 
-    private function getProjectID(int $id)
-    {
-        $returnId = [];
-
-        /** @var $projects */
-        $projects = $this->getDoctrine()->getManager()
-            ->getRepository(Project::class)
-            ->findBy(['author' => $id]);
-
-        foreach ($projects as $project)
-        {
-            array_push($returnId, $project->getId());
-        }
-
-        return $returnId;
-    }
-
-
     /**
      * @Route("/tasks/{id}/edit", name="task_edit_byId")
      * @return Response
@@ -141,13 +113,13 @@ class TaskController extends AbstractController
     public function editTask(Request $request, $id): Response
     {
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
-
         $this->denyAccessUnlessGranted('task_edit', $task);
 
         $option = [
             'userId' => $this->getUser()->getId(),
             'hasAdmin' => $this->isGranted('ROLE_ADMIN'),
         ];
+
         $form = $this->createForm(TaskType::class, $task, $option);
 
         $form->handleRequest($request);

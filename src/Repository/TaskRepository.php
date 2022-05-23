@@ -23,11 +23,12 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function getAvailableTasksByFilter($id, $hasAdmin = false, $filter = []): array
     {
-        if(isset($filter) and $hasAdmin)
+
+        if(!empty($filter) and $hasAdmin)
         {
             return $this->getTasksByFilter($filter);
         }
-        if(isset($filter) and !$hasAdmin)
+        if(!empty($filter) and !$hasAdmin)
         {
             $tasks = $this->getTasksByFilter($filter);
             foreach ($tasks as $key => $task)
