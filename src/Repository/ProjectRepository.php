@@ -39,10 +39,15 @@ class ProjectRepository extends ServiceEntityRepository
      */
     public function getAvailableProjects(int $id, Bool $hasAdmin = false): array
     {
-        $filter['author'] = null;
-        if(!$hasAdmin)
+        if($hasAdmin)
+        {
+            return $this->getEntityManager()->getRepository(Project::class)->findAll();
+        }
+        else
+        {
             $filter['author'] = $id;
-        return $this->getEntityManager()->getRepository(Project::class)->findBy($filter);
+            return $this->getEntityManager()->getRepository(Project::class)->findBy($filter);
+        }
     }
 
     /**

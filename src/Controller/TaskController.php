@@ -146,9 +146,10 @@ class TaskController extends AbstractController
     /**
      * @Route("/tasks/{id}/complete", name="task_complete")
      * @IsGranted("ROLE_USER")
+     * swap true and false
      * @return Response
      */
-    public function complete($id): Response
+    public function swapValueCompleteTask($id): Response
     {
         /** @var Task $task */
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
@@ -159,7 +160,7 @@ class TaskController extends AbstractController
             throw $this->createNotFoundException(sprintf("Task with id %s not found", $id));
         }
 
-        $task->setIsCompleted(true);
+        $task->swapValueIsCompleted();
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
@@ -170,7 +171,6 @@ class TaskController extends AbstractController
     private function getProjectID(int $id)
     {
         $returnId = [];
-
 
         /** @var $projects */
         $projects = $this->getDoctrine()->getManager()
@@ -192,20 +192,13 @@ class TaskController extends AbstractController
      */
     public function editTask(Request $request, $id): Response
     {
-        $user = $this->getUser();
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
-        if(!$this->isGranted('ROLE_ADMIN'))
-        {
-            if($user->getId() !== $task->getAuthor()->getId())
-            {
-                throw $this->createAccessDeniedException();
-            }
-        }
+        $this->denyAccessUnlessGranted('task_edit', $task);
 
         $option = [
             'userId' => $this->getUser()->getId(),
-            'userRole' => $this->getUser()->getRoles(),
+            'hasAdmin' => $this->isGranted('ROLE_ADMIN'),
         ];
         $form = $this->createForm(TaskType::class, $task, $option);
 

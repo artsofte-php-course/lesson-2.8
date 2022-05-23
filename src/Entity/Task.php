@@ -173,7 +173,21 @@ class Task
      */
     public function isCompleted() : bool
     {
-        return (boolean) $this->isCompleted;
+        return (bool)$this->isCompleted;
+    }
+
+    public function swapValueIsCompleted(): self
+    {
+        if($this->isCompleted())
+        {
+            $this->isCompleted = False;
+            return $this;
+        }
+        else
+        {
+            $this->isCompleted = True;
+            return $this;
+        }
     }
 
     /**

@@ -47,10 +47,19 @@ class Project
         return $this->token;
     }
 
-    public function setToken(string $token): self
+    /**
+     * @param string|null $token
+     * null if you want auto generate token
+     * @return $this
+     */
+    public function setToken(string $token = null): self
     {
+        if($token === null)
+        {
+            $this->token = $this->generateToken();
+            return $this;
+        }
         $this->token = $token;
-
         return $this;
     }
 
@@ -76,5 +85,10 @@ class Project
         $this->author = $author;
 
         return $this;
+    }
+
+    private function generateToken($length = 5): string
+    {
+        return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/strlen($x)) )),1,$length);
     }
 }

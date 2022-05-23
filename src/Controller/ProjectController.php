@@ -18,16 +18,6 @@ use Symfony\Component\Security\Core\Security;
 class ProjectController extends AbstractController
 {
     /**
-     * @var Security
-     */
-    private $security;
-
-    public function __construct(Security $security)
-    {
-        $this->security = $security;
-    }
-
-    /**
      * @Route("/project/list", name="project_list")
      */
     public function showPorjects(Request $request): Response
@@ -37,7 +27,6 @@ class ProjectController extends AbstractController
         $projects = $this->getDoctrine()
             ->getRepository(Project::class)
             ->getAvailableProjects($user->getId(), $this->isGranted('ROLE_ADMIN'));
-
 
         return $this->render('project/index.html.twig', [
             'projects' => $projects,
@@ -53,16 +42,11 @@ class ProjectController extends AbstractController
         $form = $this->createForm(ProjectType::class, $project);
 
         $form->handleRequest($request);
-        $user = $this->getUser();
-
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-
-
-            $project->setToken(strval(random_int(10000, 99999)));
-
-            $project->setAuthor($user->getId());
+            $project->setAuthor($this->getUser()->getId());
+            $project->setToken();
 
             $this->getDoctrine()->getManager()->persist($project);
             $this->getDoctrine()->getManager()->flush();
@@ -77,7 +61,7 @@ class ProjectController extends AbstractController
 
 
     /**
-     * @Route("/project/{id}/", name="project_byId")
+     * @Route("/project/{id}", name="project_byId")
      */
     public function projectById($id): Response
     {
@@ -88,15 +72,7 @@ class ProjectController extends AbstractController
             throw $this->createNotFoundException(sprintf("Project with id %s not found", $id));
         }
 
-        $user = $this->getUser();
-
-        if(!$this->isGranted('ROLE_ADMIN'))
-        {
-            if($user->getId() !== $project->getAuthor())
-            {
-                throw $this->createAccessDeniedException();
-            }
-        }
+        $this->denyAccessUnlessGranted('project_view', $project);
 
         $tasks = $this->getDoctrine()->getRepository(Task::class)
             ->findBy(['project' => $id], []);
@@ -114,23 +90,14 @@ class ProjectController extends AbstractController
     public function editProject(Request $request, $id): Response
     {
         $project = $this->getDoctrine()->getManager()->find(Project::class, $id);
+        $this->denyAccessUnlessGranted('project_edit', $project);
 
-        $user = $this->getUser();
-
-        if(!$this->isGranted('ROLE_ADMIN'))
-        {
-            if($user->getId() !== $project->getAuthor())
-            {
-                throw $this->createAccessDeniedException();
-            }
-        }
 
         $form = $this->createForm(ProjectType::class, $project);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
 
             $this->getDoctrine()->getManager()->persist($project);
             $this->getDoctrine()->getManager()->flush();
