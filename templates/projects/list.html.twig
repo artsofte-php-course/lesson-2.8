@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-{% set admin = app.user.checkRole("ROLE_ADMIN") %}
+{% set admin = app.user.hasRole("ROLE_ADMIN") %}
     <div class="container">
         <div class="row">
             <div class="col">
@@ -21,7 +21,7 @@
                     <tbody>
                     {% for project in projects %}
                         <tr>
-                            <td><a href="{{ path("project_info", {"slug": project.projectKey}) }}">
+                            <td><a href="{{ path("project_show", {"slug": project.projectKey}) }}">
                                     {{ project.projectKey }}</a></td>
                             <td>{{ project.name }}</td>
                             {% if admin %}

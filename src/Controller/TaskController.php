@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Project;
 use App\Entity\Task;
+use App\Entity\User;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
 use Doctrine\Common\Collections\Criteria;
@@ -28,12 +29,10 @@ class TaskController extends AbstractController
     {
         $task = new Task();
         $user = $this -> getUser();
-        $project_repository = $this -> getDoctrine() -> getRepository(Project::class);
+        $projectRepository = $this -> getDoctrine() -> getRepository(Project::class);
 
         $form = $this->createForm(TaskType::class, $task, [
-            "projects_list" => in_array("ROLE_ADMIN", $user -> getRoles()) ?
-                $project_repository -> findAll() :
-                $project_repository -> findBy(["owner" => $user])
+            "projectsList" => $projectRepository -> findByUserRole($user -> getId())
         ]);
 
         $form->handleRequest($request);
@@ -49,7 +48,7 @@ class TaskController extends AbstractController
 
         return $this->render("task/create.html.twig", [
             'form' => $form->createView(),
-            "action" => "creating",
+            "action" => "create",
         ]);
     }
 
@@ -60,59 +59,29 @@ class TaskController extends AbstractController
     public function list(Request $request): Response
     {
         $user = $this -> getUser();
-        $user_is_admin = in_array("ROLE_ADMIN", $user -> getRoles());
+        $userIsAdmin = $this -> isGranted("ROLE_ADMIN");
 
-        $project_repository = $this -> getDoctrine() -> getRepository(Project::class);
-        $task_repository = $this->getDoctrine()->getRepository(Task::class);
-
-        $projects_list = $user_is_admin ?
-            $project_repository -> findAll() :
-            $project_repository -> findBy(["owner" => $user]);
+        $projectRepository = $this -> getDoctrine() -> getRepository(Project::class);
+        $userRepository = $this->getDoctrine()->getRepository(User::class);
+        $projectsList = $projectRepository -> findByUserRole($user -> getId());
+        $projectsIdList = array_map(function ($item) { return $item->getId(); }, $projectsList);
 
         $taskFilterForm = $this->createForm(TaskFilterType::class, options: [
-            "projects_list" => $projects_list,
-            "authors_list" => $user_is_admin ?
-                $task_repository ->getTasksAuthors() :
-                $task_repository -> getTasksAuthorsByProjectOwnerId($user -> getId()),
-            "owners_list" => $user_is_admin ?
-                $project_repository -> getProjectOwners() :
-                Array($user -> getUsername() => $user -> getId()),
+            "projectsList" => $projectsList,
+            "authorsList" => $userRepository->findByTaskAuthorshipInProjectList($projectsIdList),
+            "ownersList" => $userRepository->findByProjectOwnershipInProjectList($projectsIdList),
         ]);
 
         $taskFilterForm->handleRequest($request);
+        $taskRepository = $this->getDoctrine()->getRepository(Task::class);
 
         if ($taskFilterForm->isSubmitted() && $taskFilterForm->isValid()) {
-
-            $data = $taskFilterForm->getData();
-
-            $filters = Array();
-//            dd($data);
-            if ($data["isCompleted"] !== null) {
-                $filters[] = "t.is_completed=" . (int)$data["isCompleted"];
-            }
-
-            if ($data["filter-by-project"]) {
-                $filters[] = "t.project_id=" . $data["project"] -> getId();
-            }
-
-            if ($data["filter-by-author"]) {
-                $filters[] = "t.author_id=" . $data["author"];
-            }
-
-            if ($data["filter-by-owner"]) {
-                $filters[] = "p.owner_id=" . $data["project-owner"];
-            }
-
-            $tasks = $task_repository -> findByFilters($filters,
-                orders: [
-                    "dueDate" => $data["sort-by-date"] ? "ASC" : "DESC",
-                    "name" => $data["sort-by-name"] ? "ASC" : "DESC"
-                ]);
-
+            $tasks = $taskRepository -> findByFilterData($taskFilterForm->getData(),
+                !($this->isGranted("ROLE_ADMIN")) ? $this->getUser()->getId() : null);
         } else {
-            $tasks = $user_is_admin ?
-                $task_repository -> findBy([], ["dueDate" => "DESC"]) :
-                $task_repository -> getTasksByProjectOwnerId($user -> getId());
+            $tasks = $userIsAdmin ?
+                $taskRepository -> findBy([], ["dueDate" => "DESC"]) :
+                $taskRepository -> findByProjectOwnerId($user -> getId());
         }
 
         return $this->render('task/list.html.twig', [
@@ -156,12 +125,10 @@ class TaskController extends AbstractController
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
         $user = $this -> getUser();
-        $project_repository = $this -> getDoctrine() -> getRepository(Project::class);
+        $projectRepository = $this -> getDoctrine() -> getRepository(Project::class);
 
         $form = $this->createForm(TaskType::class, data: $task, options: [
-            "projects_list" => in_array("ROLE_ADMIN", $user -> getRoles()) ?
-                $project_repository -> findAll() :
-                $project_repository -> findBy(["owner" => $user])
+            "projectsList" => $projectRepository -> findByUserRole($user -> getId()),
         ]);
 
         $form -> handleRequest($request);
@@ -175,7 +142,7 @@ class TaskController extends AbstractController
 
         return $this -> render('task/create.html.twig', [
             "form" => $form -> createView(),
-            "action" => "editing",
+            "action" => "edit",
             "id" => $id
         ]);
     }

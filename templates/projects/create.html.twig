@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col"></div>
         <div class="col">
-            {{ action == "creating" ?
+            {{ action == "create" ?
                 form(form, {"action": path("project_create"), "method": "POST"}) :
                 form(form, {"action": path("project_edit", {"slug": slug}), "method": "POST"})
             }}

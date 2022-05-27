@@ -21,13 +21,13 @@ class ProjectController extends AbstractController
 
     public function list(Request $request): Response
     {
-        $user = $this -> getUser();
-        $project_repository = $this -> getDoctrine() -> getManager() -> getRepository(Project::class);
+        $user = $this->getUser();
+        $projectRepository = $this->getDoctrine() -> getManager() -> getRepository(Project::class);
 
         if (in_array("ROLE_ADMIN", $user -> getRoles())) {
-            $projects = $project_repository -> findAll();
+            $projects = $projectRepository -> findAll();
         } else {
-            $projects = $project_repository -> findBy(['owner' => $user]);
+            $projects = $projectRepository -> findBy(['owner' => $user]);
         }
         return $this -> render("projects/list.html.twig", [
             "projects" => $projects,
@@ -58,19 +58,19 @@ class ProjectController extends AbstractController
 
         return $this -> render("projects/create.html.twig", [
             "form" => $form -> createView(),
-            "action" => "creating"
+            "action" => "create"
         ]);
     }
 
     /**
-     * @Route("/projects/{slug}", name="project_info")
+     * @Route("/projects/{slug}", name="project_show")
      * @return Response
      */
-    public function info($slug, Request $request): Response
+    public function show($slug, Request $request): Response
     {
-        $project = $this -> getDoctrine() -> getManager() -> find(Project::class, $slug);
-
-        $tasks = $this -> getDoctrine() -> getRepository(Task::class) -> findBy(["project" => $project]);
+        $project = $this->getDoctrine()->getRepository(Project::class)->findOneBy(["projectKey" => $slug]);
+//        dd($project);
+        $tasks = $project -> getTasks();
 
         return $this->render('task/project_tasks.html.twig', [
             'tasks' => $tasks,
@@ -86,7 +86,7 @@ class ProjectController extends AbstractController
      */
     public function edit($slug, Request $request): Response
     {
-        $project = $this->getDoctrine()->getRepository(Project::class) -> findBy(["projectKey" => $slug])[0];
+        $project = $this->getDoctrine()->getRepository(Project::class) -> findOneBy(["projectKey" => $slug]);
 
         $form = $this->createForm(ProjectType::class, $project);
 
@@ -101,7 +101,7 @@ class ProjectController extends AbstractController
 
         return $this->render("projects/create.html.twig", [
             "form" => $form->createView(),
-            "action" => "editing",
+            "action" => "edit",
             "slug" => $slug
         ]);
     }
@@ -115,7 +115,12 @@ class ProjectController extends AbstractController
     public function delete($slug, Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $project = $this->getDoctrine()->getRepository(Project::class) -> findBy(["projectKey" => $slug])[0];
+        $project = $this->getDoctrine()->getRepository(
+            Project::class) -> findOneBy(["projectKey" => $slug]);
+
+        if ($project === null) {
+            throw $this->createNotFoundException(sprintf("Task with key %key not found", $slug));
+        }
 
         $em -> remove($project);
         $em -> flush();

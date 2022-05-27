@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Project;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,19 +17,21 @@ class ProjectRepository extends ServiceEntityRepository
         parent::__construct($registry, Project::class);
     }
 
-    /**
-     * @throws Exception
-     */
+    public function findByUserRole($id) : array
+    {
+        if ($this->getEntityManager()->find(User::class, $id)->hasRole("ROLE_ADMIN")) {
+            return $this->findAll();
+        } else {
+            return $this->findBy(["owner" => $id]);
+        }
+    }
+
     public function getProjectOwners() : array
     {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = "
-            SELECT DISTINCT u.email, u.id 
-            FROM project as p INNER JOIN user as u
-            ON p.owner_id = u.id;
-        ";
-        $stmt = $conn->prepare($sql);
-        return $stmt ->executeQuery() -> fetchAllAssociative();
+        return $this->createQueryBuilder("p")
+            ->select(["distinct u.email", "u.id"])
+            ->innerJoin("p.owner", "u")
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -83,7 +83,7 @@ class User implements UserInterface
      * @param string $role
      * @return bool
      */
-    public function checkRole(string $role): bool
+    public function hasRole(string $role): bool
     {
         return in_array($role, $this -> roles);
     }
