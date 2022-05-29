@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Project;
+use App\Repository\ProjectRepository;
 use App\Type\ProjectType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,8 +49,7 @@ class ProjectController extends AbstractController
     public function list(Request $request): Response
     {
         $projects = $this->getDoctrine()->getManager()
-            ->getRepository(Project::class)
-            ->findAll();
+            ->getRepository(Project::class)->findAllByUser($this->getUser());
         return $this->render('project/list.html.twig', [
             'projects' => $projects,
         ]);
