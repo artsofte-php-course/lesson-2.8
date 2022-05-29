@@ -14,7 +14,6 @@ use Symfony\Component\HttpFoundation\Request;
 class TaskController extends AbstractController
 {
     /**
-     *
      * @Route("/tasks/create", name="task_create")
      * @param Request $request
      * @return Response
@@ -22,12 +21,12 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
+
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $task->setAuthor($this->getUser());
 
             $this->getDoctrine()->getManager()->persist($task);
@@ -44,6 +43,7 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/tasks", name="task_list")
+     * @param Request $request
      * @return Response
      */
     public function list(Request $request): Response
@@ -54,26 +54,12 @@ class TaskController extends AbstractController
 
         if ($taskFilterForm->isSubmitted() && $taskFilterForm->isValid()) {
 
-            $filter = $taskFilterForm->getData();
-            if ($filter['isCompleted'] === null) {
-                unset($filter['isCompleted']);
-            }
+            $filters = $taskFilterForm->getData();
 
-            $tasks = $this->getDoctrine()->getRepository(Task::class)
-                ->findBy($filter, [
-                    'dueDate' => 'DESC'
-                ]);
-
+            $tasks = $this->getDoctrine()->getRepository(Task::class)->getByFilter($filters);
         } else {
-            /** @var $tasks */
-            $tasks = $this->getDoctrine()->getManager()
-                ->getRepository(Task::class)
-                ->findBy([], [
-                    'dueDate' => 'DESC'
-                ]);
+            $tasks = $this->getDoctrine()->getRepository(Task::class)->getByFilter();
         }
-
-
 
         return $this->render('task/list.html.twig', [
             'tasks' => $tasks,
@@ -103,5 +89,31 @@ class TaskController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         return $this->redirectToRoute('task_list');
+    }
+
+    /**
+     * @Route("/tasks/{id}/edit", name="task_edit")
+     * @return Response
+     */
+    public function edit(Request $request, $id): Response
+    {
+        $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
+
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('task_list');
+        }
+
+        return $this->render("task/edit.html.twig", [
+            'form' => $form->createView(),
+            'id' => $id
+        ]);
     }
 }
