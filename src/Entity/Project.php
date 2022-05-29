@@ -10,7 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=ProjectRepository::class)
  */
-class Project{
+class Project
+{
 
     /**
      * @ORM\Id
@@ -18,15 +19,6 @@ class Project{
      * @ORM\Column(type="integer")
      */
     protected $id;
-
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
 
     /**
      * @ORM\Column(type="string", length=5)
@@ -38,6 +30,27 @@ class Project{
      * @var
      */
     protected $token; //5 latin symbols
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
+     * @var
+     */
+    protected $name;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="user")
+     * @var User
+     */
+    protected $owner;
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @param mixed $name
@@ -56,14 +69,6 @@ class Project{
     }
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank
-     * @var
-     */
-    protected $name;
-
-
-    /**
      * @param mixed $name
      */
     public function setName($name): void
@@ -80,12 +85,6 @@ class Project{
     }
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="user")
-     * @var User
-     */
-    protected $owner;
-
-    /**
      * Set task Author
      * @param User|null $author
      * @return void
@@ -95,7 +94,6 @@ class Project{
         $this->owner = $owner;
     }
 
-
     /**
      * Return task author
      * @return User|null
@@ -104,5 +102,4 @@ class Project{
     {
         return $this->owner;
     }
-
 }
