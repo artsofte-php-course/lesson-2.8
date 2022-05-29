@@ -6,12 +6,10 @@
             <div class="col">
             </div>
             <div class="col">
-                {{ form(filterForm, {"action" : path('task_list'), "method" : "GET"}) }}
                 <table class="table">
                     <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Проект</th>
                         <th scope="col">Название</th>
                         <th scope="col">Описание</th>
                         <th scope="col">Срок выполнения</th>
@@ -24,7 +22,6 @@
                     {% for task in tasks %}
                         <tr>
                             <th scope="row">{{ task.id }}</th>
-                            <td>{{ task.project }}</td>
                             <td>{{ task.name }}</td>
                             <td>{{ task.description }}</td>
                             <td>{{ task.dueDate|date("d.m.Y") }}</td>
@@ -33,19 +30,12 @@
                             <td>
                                 {% if (is_granted("complete", task)) %}
                                     <a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a>
-                                    <a href="{{ path("task_edit", {'id': task.id}) }}">Редактивровать</a>
                                 {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-
-                <a href="{{ path("project_list") }}" title="Список проектов">Список проектов</a> <br>
-                <a href="{{ path("project_add") }}" title="Создать проект">Создать проект</a> <br>
-                <a href="{{ path("task_list") }}" title="Список задач">Список задач</a> <br>
-                <a href="{{ path("task_create") }}" title="Создать задачу">Создать задачу</a>
-
             </div>
             <div class="col">
             </div>

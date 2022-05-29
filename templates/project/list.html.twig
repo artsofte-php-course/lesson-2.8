@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <table class="table">
+
+                    <thead>
+                    <tr>
+                        <th scope="col">Ключ</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Владелец</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td><a href="{{ path("project_show", {"slug": project.sign}) }}">
+                                    {{ project.sign }}</a></td>
+
+                            <td>{{ project.name }}</td>
+
+                            <td>{{ project.owner }}</td>
+
+                            <td>
+                                <p><a href="{{ path("project_remove", {"slug": project.sign}) }}">Удалить</a></p>
+                                <p><a href="{{ path("project_edit", {"slug": project.sign}) }}">Редактировать</a></p>
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ path("project_list") }}" title="Список проектов">Список проектов</a> <br>
+                <a href="{{ path("project_add") }}" title="Создать проект">Создать проект</a> <br>
+                <a href="{{ path("task_list") }}" title="Список задач">Список задач</a> <br>
+                <a href="{{ path("task_create") }}" title="Создать задачу">Создать задачу</a>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}
