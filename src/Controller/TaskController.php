@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Project;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
@@ -22,13 +23,21 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class, $task, ["data" => $this->getDoctrine()->getManager()
+            ->getRepository(Project::class)->findAllByUser($this->getUser())]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+//            var_dump($form);
+
             $task->setAuthor($this->getUser());
+            $task->setName($form->get('name')->getData());
+            $task->setDueDate($form->get('dueDate')->getData());
+            $task->setDescription($form->get('description')->getData());
+            $task->setProject($this->getDoctrine()->getManager()
+                ->getRepository(Project::class)->find($form->get('project')->getData()));
 
             $this->getDoctrine()->getManager()->persist($task);
             $this->getDoctrine()->getManager()->flush();
@@ -74,7 +83,6 @@ class TaskController extends AbstractController
         }
 
 
-
         return $this->render('task/list.html.twig', [
             'tasks' => $tasks,
             'filterForm' => $taskFilterForm->createView()
@@ -86,8 +94,11 @@ class TaskController extends AbstractController
      * @IsGranted("ROLE_USER")
      * @return Response
      */
-    public function complete($id): Response
+    public function complete(Request $request): Response
     {
+        $id = $request->get('id');
+        $token = $request->get('token');
+
         /** @var Task $task */
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
@@ -101,6 +112,10 @@ class TaskController extends AbstractController
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
+
+        if ($token !== null) {
+            return $this->redirectToRoute('project_page', ["id" => $token]);
+        }
 
         return $this->redirectToRoute('task_list');
     }

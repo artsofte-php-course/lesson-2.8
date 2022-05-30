@@ -14,6 +14,8 @@
                         <th scope="col">Название</th>
                         <th scope="col">Описание</th>
                         <th scope="col">Срок выполнения</th>
+                        <th scope="col">ID token проекта</th>
+                        <th scope="col">Проект</th>
                         <th scope="col">Автор</th>
                         <th scope="col">Выполнена</th>
                         <th scope="col">Действия</th>
@@ -26,6 +28,8 @@
                             <td>{{ task.name }}</td>
                             <td>{{ task.description }}</td>
                             <td>{{ task.dueDate|date("d.m.Y") }}</td>
+                            <td>{{ task.project.token }}</td>
+                            <td><a href="/projects/{{ task.project.token }}">{{ task.project.name }}</a></td>
                             <td>{{ task.author }}</td>
                             <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
                             <td>
