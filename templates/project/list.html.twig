@@ -4,8 +4,6 @@
     <div class="container">
         <div class="row">
             <div class="col">
-            </div>
-            <div class="col">
                 <table class="table">
                     <thead>
                     <tr>
@@ -13,6 +11,7 @@
                         <th scope="col">Ключ</th>
                         <th scope="col">Название</th>
                         <th scope="col">Владелец</th>
+                        <th scope="col">Страница проекта</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -22,6 +21,7 @@
                             <td>{{ project.token }}</td>
                             <td>{{ project.name }}</td>
                             <td>{{ project.owner.email }}</td>
+                            <td><a href="/projects/{{ project.token }}">{{ project.name }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -31,6 +31,5 @@
 
             </div>
         </div>
-    </div>
     </div>
 {% endblock %}

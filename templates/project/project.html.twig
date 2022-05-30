@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <p>Page of project {{ project.name }}</p>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Название</th>
+                <th scope="col">Описание</th>
+                <th scope="col">Срок выполнения</th>
+                <th scope="col">Автор</th>
+                <th scope="col">Выполнена</th>
+                <th scope="col">Действия</th>
+            </tr>
+            </thead>
+            {% for task in tasks %}
+                <tr>
+                    <th scope="row">{{ task.id }}</th>
+                    <td>{{ task.name }}</td>
+                    <td>{{ task.description }}</td>
+                    <td>{{ task.dueDate|date("d.m.Y") }}</td>
+                    <td>{{ task.author }}</td>
+                    <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
+                    <td>
+                        {% if not (task.isCompleted) %}
+{#                            <a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a>#}
+                            <a href="{{ path("task_complete", {"id" : task.id, "token" : project.token}) }}">Сделано</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

@@ -94,8 +94,11 @@ class TaskController extends AbstractController
      * @IsGranted("ROLE_USER")
      * @return Response
      */
-    public function complete($id): Response
+    public function complete(Request $request): Response
     {
+        $id = $request->get('id');
+        $token = $request->get('token');
+
         /** @var Task $task */
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
@@ -109,6 +112,10 @@ class TaskController extends AbstractController
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
+
+        if ($token !== null) {
+            return $this->redirectToRoute('project_page', ["id" => $token]);
+        }
 
         return $this->redirectToRoute('task_list');
     }

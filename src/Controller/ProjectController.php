@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Project;
+use App\Entity\Task;
 use App\Repository\ProjectRepository;
 use App\Type\ProjectType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -52,6 +53,25 @@ class ProjectController extends AbstractController
             ->getRepository(Project::class)->findAllByUser($this->getUser());
         return $this->render('project/list.html.twig', [
             'projects' => $projects,
+        ]);
+    }
+
+    /**
+     * @Route("/projects/{id}", name="project_page")
+     * @param $id
+     * @return Response
+     */
+    public function projectPage($id): Response
+    {
+        $project = $this->getDoctrine()->getManager()
+            ->getRepository(Project::class)->findOneBy(['token' => $id]);
+
+        $tasks = $this->getDoctrine()->getManager()
+            ->getRepository(Task::class)->findAllByProject($project);
+
+        return $this->render('project/project.html.twig', [
+            'project' => $project,
+            'tasks' => $tasks
         ]);
     }
 }

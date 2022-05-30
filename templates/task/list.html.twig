@@ -29,7 +29,7 @@
                             <td>{{ task.description }}</td>
                             <td>{{ task.dueDate|date("d.m.Y") }}</td>
                             <td>{{ task.project.token }}</td>
-                            <td>{{ task.project.name }}</td>
+                            <td><a href="/projects/{{ task.project.token }}">{{ task.project.name }}</a></td>
                             <td>{{ task.author }}</td>
                             <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
                             <td>
