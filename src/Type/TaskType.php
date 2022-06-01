@@ -2,6 +2,8 @@
 
 namespace App\Type;
 
+use App\Entity\Project;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -19,6 +21,10 @@ class TaskType extends AbstractType
             ->add('dueDate', DateType::class, [
                 'years' => range(2022,2023)
             ])
+            ->add('project', EntityType::class, [
+                'class' => Project::class
+            ])
+
             ->add('save', SubmitType::class)
         ;
     }

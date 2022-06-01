@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Type\TaskFilterType;
 use App\Type\TaskType;
+use App\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,12 +23,12 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+
+        $form = $this->createForm(TaskType::class,$task);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $task->setAuthor($this->getUser());
 
             $this->getDoctrine()->getManager()->persist($task);
@@ -44,6 +45,7 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/tasks", name="task_list")
+     * @param Request $request
      * @return Response
      */
     public function list(Request $request): Response
@@ -72,7 +74,6 @@ class TaskController extends AbstractController
                     'dueDate' => 'DESC'
                 ]);
         }
-
 
 
         return $this->render('task/list.html.twig', [
