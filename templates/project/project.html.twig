@@ -6,7 +6,6 @@
             <div class="col">
             </div>
             <div class="col">
-                {{ form(filterForm, {"action" : path('task_list'), "method" : "GET"}) }}
                 <table class="table">
                     <thead>
                     <tr>
@@ -37,9 +36,6 @@
                     {% endfor %}
                     </tbody>
                 </table>
-
-                <p><a href="{{ path("task_create") }}" title="Создать задачу">Создать задачу</a></p>
-                <p><a href="{{ path("listProject") }}" title="Список проектов">Список проектов</a></p>
             </div>
             <div class="col">
             </div>
