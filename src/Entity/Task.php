@@ -56,6 +56,11 @@ class Task
     protected $author;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="project")
+     */
+    private $project;
+
+    /**
      * Create empty task
      */
     public function __construct()
@@ -161,7 +166,15 @@ class Task
         $this->isCompleted = $isCompleted;
     }
 
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
 
+    public function setProject(?Project $project): self
+    {
+        $this->project = $project;
 
-
+        return $this;
+    }
 }
