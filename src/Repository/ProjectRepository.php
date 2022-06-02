@@ -7,6 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * @method Project|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,6 +20,16 @@ class ProjectRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
+    }
+
+    public function getAvailableProjects(int $id, bool $hasAdmin = false) {
+        if ($hasAdmin) {
+            return $this->getEntityManager()->getRepository(Project::class)
+                ->findAll();
+        }
+        $filter['author'] = $id;
+
+        return $this->getEntityManager()->getRepository(Project::class)->findBy($filter);
     }
 
     /**

@@ -19,7 +19,7 @@
                     <tbody>
                     {% for project in projects %}
                         <tr>
-                            <th scope="row">{{ project.id }}</th>
+                            <th scope="row"><a href="{{ path("show_porject", { "id" : project.id }) }}) }}">{{ project.id }}</th>
                             <td>{{ project.keyProject }}</td>
                             <td>{{ project.name }}</td>
                             <td>{{ project.author }}</td>
@@ -28,7 +28,8 @@
                     </tbody>
                 </table>
 
-                <a href="{{ path("project_create") }}" title="Make project">Make project</a>
+                <a href="{{ path("project_create") }}" title="Make project">Make project</a><hr>
+                <a href="{{ path("task_list") }}">Go to task list</a>
 
             </div>
             <div class="col">
