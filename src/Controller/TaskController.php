@@ -22,7 +22,8 @@ class TaskController extends AbstractController
     public function create(Request $request): Response
     {
         $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+        $option = ['userId' => $this->getUser()->getId(), 'hasAdmin' => $this->isGranted('ROLE_ADMIN')];
+        $form = $this->createForm(TaskType::class, $task, $option);
 
         $form->handleRequest($request);
 
@@ -53,24 +54,14 @@ class TaskController extends AbstractController
         $taskFilterForm->handleRequest($request);
 
         if ($taskFilterForm->isSubmitted() && $taskFilterForm->isValid()) {
-
             $filter = $taskFilterForm->getData();
-            if ($filter['isCompleted'] === null) {
-                unset($filter['isCompleted']);
-            }
-
-            $tasks = $this->getDoctrine()->getRepository(Task::class)
-                ->findBy($filter, [
-                    'dueDate' => 'DESC'
-                ]);
-
-        } else {
-            /** @var $tasks */
-            $tasks = $this->getDoctrine()->getManager()
+            $tasks = $this->getDoctrine()
                 ->getRepository(Task::class)
-                ->findBy([], [
-                    'dueDate' => 'DESC'
-                ]);
+                ->getAvaiableTaskWithFilter($this->getUser()->getId(), $filter, $this->isGranted('ROLE_ADMIN'));
+        } else {
+            $tasks = $this->getDoctrine()
+                ->getRepository(Task::class)
+                ->getAvaiableTask($this->getUser()->getId(), $this->isGranted('ROLE_ADMIN'));
         }
 
 
@@ -91,13 +82,20 @@ class TaskController extends AbstractController
         /** @var Task $task */
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
 
-        $this->denyAccessUnlessGranted('complete', $task);
-
         if ($task === null) {
             throw $this->createNotFoundException(sprintf("Task with id %s not found", $id));
         }
+        $this->denyAccessUnlessGranted('complete', $task);
 
-        $task->setIsCompleted(true);
+        if($task->isCompleted())
+        {
+            $task->setIsCompleted();
+        }
+        else
+        {
+            $task->setIsCompleted(true);
+        }
+
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();

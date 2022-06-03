@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+   <h1>
+       {{ project.name }} - {{ project.token }}
+   </h1>
+    <hr>
+    <table>
+        <thead>
+        <tr>
+            <td>
+                id
+            </td>
+            <td>
+                author
+            </td>
+            <td>
+                name
+            </td>
+            <td>
+                description
+            </td>
+            <td>
+                due date
+            </td>
+            <td>
+                Status
+            </td>
+            <td>
+                Complete
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for task in tasks %}
+            <tr>
+                <td>{{ task.id }}</td>
+                <td>{{ task.author }}</td>
+                <td>{{ task.name }}</td>
+                <td>{{ task.description }}</td>
+                <td>{{ task.dueDate|date("d.m.Y")}}</td>
+                <td>{{ task.isCompleted? "ready" : "not ready" }}</td>
+                <td>
+                    {% if (is_granted("complete", task)) %}
+                        <a href="{{ path("task_complete", {"id": task.id}) }}">Complete</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

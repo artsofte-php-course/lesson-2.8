@@ -12,6 +12,7 @@ class TaskVoter extends Voter
 {
 
     const COMPLETE = 'complete';
+    const EDIT = 'edit';
     const DELETE = 'delete';
 
 
