@@ -44,7 +44,7 @@ class Task
 
     /**
      * @ORM\Column(type="boolean", nullable=false, options={"default" : 0})
-     * @var boolean
+     * @var bool
      */
     protected $isCompleted = false;
 
@@ -54,6 +54,12 @@ class Task
      * @var User
      */
     protected $author;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Project", inversedBy="project")
+     * @var Project
+     */
+    protected $project;
 
     /**
      * Create empty task
@@ -83,6 +89,22 @@ class Task
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * @return Project|null
+     */
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
+
+    /**
+     * @param Project $project
+     */
+    public function setProject(Project $project = null)
+    {
+        $this->project = $project;
     }
 
 
@@ -148,7 +170,7 @@ class Task
      */
     public function isCompleted() : bool
     {
-        return (boolean) $this->isCompleted;
+        return $this->isCompleted;
     }
 
     /**
@@ -160,7 +182,6 @@ class Task
     {
         $this->isCompleted = $isCompleted;
     }
-
 
 
 
