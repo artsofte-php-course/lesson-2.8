@@ -21,15 +21,26 @@
                     <tbody>
                     {% for project in projects %}
                         <tr>
-                            <td><a href="{{ path("project_show", {"slug": project.projectKey}) }}">
-                                    {{ project.projectKey }}</a></td>
+                            <td>
+                                {% if (is_granted("view", project)) %}
+                                    <a href="{{ path("project_show", {"slug": project.projectKey}) }}">
+                                        {{ project.projectKey }}</a>
+                                {% else %}
+                                    {{ project.projectKey }}
+                                {% endif %}
+                            </td>
                             <td>{{ project.name }}</td>
                             {% if admin %}
                                 <td>{{ project.owner }}</td>
                             {% endif %}
                             <td>
-                                <p><a href="{{ path("project_delete", {"slug": project.projectKey}) }}">Удалить</a></p>
-                                <p><a href="{{ path("project_edit", {"slug": project.projectKey}) }}">Edit</a></p>
+                                {% if (is_granted("delete", project)) %}
+                                    <a href="{{ path("project_delete", {"slug": project.projectKey}) }}">
+                                        Удалить</a><br />
+                                {% endif %}
+                                {% if (is_granted("edit", project)) %}
+                                    <a href="{{ path("project_edit", {"slug": project.projectKey}) }}">Edit</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

@@ -13,12 +13,13 @@ class TaskVoter extends Voter
 
     const COMPLETE = 'complete';
     const DELETE = 'delete';
+    const EDIT = "edit";
 
 
     protected function supports($attribute, $subject)
     {
 
-        if (!in_array($attribute, [self::COMPLETE, self::DELETE])) {
+        if (!in_array($attribute, [self::COMPLETE, self::DELETE, self::EDIT])) {
             return false;
         }
 
@@ -44,10 +45,11 @@ class TaskVoter extends Voter
             return false;
         }
 
-        $isAdmin =  in_array('ROLE_ADMIN', $user->getRoles());
-        $isAuthor = ($subject->getAuthor() === $user);
+        $isAdmin =  $user->hasRole("ROLE_ADMIN");
+//        $isAuthor = ($subject->getAuthor() === $user);
+        $isProjectOwner = ($subject->getProject()->getOwner() === $user);
 
-        return $isAdmin || $isAuthor;
+        return $isAdmin || $isProjectOwner;
     }
 
 

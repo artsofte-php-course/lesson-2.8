@@ -25,13 +25,4 @@ class ProjectRepository extends ServiceEntityRepository
             return $this->findBy(["owner" => $id]);
         }
     }
-
-    public function getProjectOwners() : array
-    {
-        return $this->createQueryBuilder("p")
-            ->select(["distinct u.email", "u.id"])
-            ->innerJoin("p.owner", "u")
-            ->getQuery()
-            ->getResult();
-    }
 }

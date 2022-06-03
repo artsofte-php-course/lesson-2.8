@@ -45,32 +45,8 @@ class TaskRepository extends ServiceEntityRepository
     /**
      * @throws Exception
      */
-    public function findTasksAuthorsByProjectOwnerId(int $id) : array
-    {
-        return $this->createQueryBuilder("t")
-            ->select(["distinct u.email", "u.id"])
-            ->innerJoin("t.author", "u")
-            ->getQuery()
-            ->getArrayResult();
-
-//        $conn = $this -> getEntityManager() -> getConnection();
-//
-//        $sql = "
-//            SELECT DISTINCT u.email, u.id
-//            FROM task as t INNER JOIN user as u ON t.author_id = u.id
-//            WHERE project_id in (SELECT id FROM project WHERE owner_id = :id);
-//        ";
-//        $stmt = $conn -> prepare($sql);
-//        return $stmt ->executeQuery(["id" => $id]) -> fetchAllKeyValue();
-    }
-
-
-    /**
-     * @throws Exception
-     */
     public function findByFilterData(array $data, ?int $user_id) : array
     {
-//        dd($data);
         $qb = $this->createQueryBuilder("t");
         $qb->select("t");
         $qb->join("App\Entity\User", "u", "WITH", "t.author = u.id");
@@ -92,7 +68,6 @@ class TaskRepository extends ServiceEntityRepository
             $qb->add("where", $qb->expr()->eq("p.owner", $data["owner"]->getId()));
         }
 
-//        $qb->orderBy()
         $qb->orderBy("t.dueDate", $data["sort-by-date"] ? "ASC" : "DESC");
         $qb->orderBy("t.name", $data["sort-by-name"] ? "ASC" : "DESC");
 

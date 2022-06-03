@@ -32,7 +32,8 @@ class TaskController extends AbstractController
         $projectRepository = $this -> getDoctrine() -> getRepository(Project::class);
 
         $form = $this->createForm(TaskType::class, $task, [
-            "projectsList" => $projectRepository -> findByUserRole($user -> getId())
+            "projectsList" => $projectRepository -> findByUserRole($user -> getId()),
+//            'userId' => 4,
         ]);
 
         $form->handleRequest($request);
@@ -82,6 +83,7 @@ class TaskController extends AbstractController
             $tasks = $userIsAdmin ?
                 $taskRepository -> findBy([], ["dueDate" => "DESC"]) :
                 $taskRepository -> findByProjectOwnerId($user -> getId());
+//            dd($tasks);
         }
 
         return $this->render('task/list.html.twig', [
@@ -123,6 +125,12 @@ class TaskController extends AbstractController
     public function edit($id, Request $request): Response
     {
         $task = $this->getDoctrine()->getManager()->find(Task::class, $id);
+
+        $this->denyAccessUnlessGranted('edit', $task);
+
+        if ($task === null) {
+            throw $this->createNotFoundException(sprintf("Task with id %s not found", $id));
+        }
 
         $user = $this -> getUser();
         $projectRepository = $this -> getDoctrine() -> getRepository(Project::class);

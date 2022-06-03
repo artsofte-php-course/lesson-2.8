@@ -33,10 +33,12 @@
                             <td>{{ task.author }}</td>
                             <td>{{ task.isCompleted ? 'Выполнена' : 'Не выполнена' }}</td>
                             <td>
-                                {% if (not task.isCompleted) %}
-                                    <p><a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a></p>
+                                {% if (is_granted("complete", task)) %}
+                                    <a href="{{ path("task_complete", {"id" : task.id}) }}">Сделано</a><br />
                                 {% endif %}
-                                <p><a href="{{ path("task_edit", {"id": task.id}) }}">Edit</a></p>
+                                {% if (is_granted("edit", task)) %}
+                                    <a href="{{ path("task_edit", {"id": task.id}) }}">Edit</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

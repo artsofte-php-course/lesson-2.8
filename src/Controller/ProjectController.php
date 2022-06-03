@@ -24,11 +24,8 @@ class ProjectController extends AbstractController
         $user = $this->getUser();
         $projectRepository = $this->getDoctrine() -> getManager() -> getRepository(Project::class);
 
-        if (in_array("ROLE_ADMIN", $user -> getRoles())) {
-            $projects = $projectRepository -> findAll();
-        } else {
-            $projects = $projectRepository -> findBy(['owner' => $user]);
-        }
+        $projects = $projectRepository->findByUserRole($user->getId());
+
         return $this -> render("projects/list.html.twig", [
             "projects" => $projects,
         ]);
@@ -70,6 +67,13 @@ class ProjectController extends AbstractController
     {
         $project = $this->getDoctrine()->getRepository(Project::class)->findOneBy(["projectKey" => $slug]);
 //        dd($project);
+
+        $this->denyAccessUnlessGranted('view', $project);
+
+        if ($project === null) {
+            throw $this->createNotFoundException(sprintf("Project with key %s not found", $slug));
+        }
+
         $tasks = $project -> getTasks();
 
         return $this->render('task/project_tasks.html.twig', [
@@ -87,6 +91,12 @@ class ProjectController extends AbstractController
     public function edit($slug, Request $request): Response
     {
         $project = $this->getDoctrine()->getRepository(Project::class) -> findOneBy(["projectKey" => $slug]);
+
+        $this->denyAccessUnlessGranted('edit', $project);
+
+        if ($project === null) {
+            throw $this->createNotFoundException(sprintf("Project with key %s not found", $slug));
+        }
 
         $form = $this->createForm(ProjectType::class, $project);
 
@@ -118,8 +128,10 @@ class ProjectController extends AbstractController
         $project = $this->getDoctrine()->getRepository(
             Project::class) -> findOneBy(["projectKey" => $slug]);
 
+        $this->denyAccessUnlessGranted('delete', $project);
+
         if ($project === null) {
-            throw $this->createNotFoundException(sprintf("Task with key %key not found", $slug));
+            throw $this->createNotFoundException(sprintf("Project with key %s not found", $slug));
         }
 
         $em -> remove($project);
