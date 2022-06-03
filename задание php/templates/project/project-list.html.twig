@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                {{ form(form, {"action" : path('project_list'), "method" : "GET"}) }}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col">Автор</th>
+                        <th scope="col">Token</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            {% if (is_granted('ROLE_ADMIN')) %}
+                                <td>{{ project.name }}</td>
+                                <td>{{ project.owner }}</td>
+                                <td>{{ project.token }}</td>
+                             {% elseif (is_granted('ROLE_USER') and (project.owner == user)) %}
+                                <td>{{ project.name }}</td>
+                                <td>{{ project.owner }}</td>
+                                <td>{{ project.token }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ path("task_create") }}" title="Создать задачу">Создать задачу</a>
+                <br>
+                <a href="{{ path("project_create") }}" title="Создать проект">Создать проект</a>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}

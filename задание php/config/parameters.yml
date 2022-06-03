@@ -1,0 +1,4 @@
+parameters:
+  database_host: localhost
+  database_name: symfony_lesson
+  database_user: root
