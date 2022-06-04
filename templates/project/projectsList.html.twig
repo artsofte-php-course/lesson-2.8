@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <th scope="row">{{ project.id }}</th>
+                            <td>{{ project.generatedKey }}</td>
+                            <td>{{ project.name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ path("project_create") }}" title="Create project">Create project</a>
+
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}
