@@ -79,6 +79,19 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this -> roles);
+    }
+
+    /**
+     * @param array $roles
+     * @return $this
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;

@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Task;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Result;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -90,4 +92,30 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ;
     }
     */
+
+    public function findByTaskAuthorshipInProjectList(?array $projectsIdList): array
+    {
+        $qb = $this->createQueryBuilder("u");
+        return $qb
+            ->select("u")
+            ->distinct()
+            ->innerJoin("App\Entity\Task", "t", "WITH", "u.id = t.author")
+            ->where($qb->expr()->in("t.project", $projectsIdList))
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByProjectOwnershipInProjectList(?array $projectsIdtList): array
+    {
+        $qb = $this->createQueryBuilder("u");
+
+        return $qb
+            ->select("u")
+            ->distinct()
+            ->innerJoin("App\Entity\Project", "p", "WITH", "u.id = p.owner")
+            ->where($qb->expr()->in("p.id", $projectsIdtList))
+            ->getQuery()
+            ->getResult();
+    }
+
 }

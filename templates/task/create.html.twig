@@ -7,7 +7,10 @@
         <div class="col">
         </div>
         <div class="col">
-            {{ form(form, {'action': path('task_create'), 'method': 'POST'}) }}
+            {{ action == "create" ?
+                form(form, {"action": path("task_create"), "method": "POST"}) :
+                form(form, {"action": path("task_edit", {"id": id}), "method": "POST"})
+            }}
         </div>
         <div class="col">
         </div>
