@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                {#                {{ form(filterForm, {"action" : path('task_list'), "method" : "GET"}) }}#}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Token</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <<th scope="row"><a href="{{ path("project_byId", {"id" : project.id}) }}">{{ project.id }}</a></th>
+                            <td>{{ project.token }}</td>
+                            <td>{{ project.name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ path("project_create") }}" title="Создать задачу" style="float: right">Создать задачу</a>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+{% endblock %}
